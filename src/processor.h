@@ -5,12 +5,26 @@
 
 namespace cmdr {
 class processor {
-  const ::cmdr::cmdr &cmdr;
+  enum class state {
+    cmd,
+    blank,
+    flag,
+  };
+
+  const cmdr &_cmdr;
+  options &_opts;
+  state _state;
+  option_id _flag;
+
+  void process_short(const char *);
+  void process_long(const char *);
+  void process_bare(const char *);
 
 public:
-  processor(const ::cmdr::cmdr &cmdr) : cmdr{cmdr} {}
-
+  processor(const cmdr &cmdr, options &opts)
+      : _cmdr{cmdr}, _opts{opts}, _state{processor::state::cmd} {}
   void visit(const char *arg);
+  void finalize();
 };
 } // namespace cmdr
 

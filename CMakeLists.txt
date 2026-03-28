@@ -9,6 +9,7 @@ add_library(
   cmdr STATIC
   src/cmdr.cpp
   src/processor.cpp
+  src/option_builder.cpp
 )
 
 find_package(GTest REQUIRED)
