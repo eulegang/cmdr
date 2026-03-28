@@ -1,0 +1,20 @@
+#! /usr/bin/env bash
+
+cd $(git rev-parse --show-toplevel)
+
+dir=${1:-build}
+
+mkdir -p $dir/lcoverage/
+
+echo "=================== LCOV ===================="
+echo "-- Passing lcov tool under code coverage"
+
+lcov --capture \
+  --directory $dir \
+  --output-file $dir/lcoverage/main_coverage.info \
+  --ignore-errors inconsistent,inconsistent \
+  --include '**/cmdr/src/**'
+
+echo "-- Generating HTML output files"
+genhtml $dir/lcoverage/main_coverage.info --output-directory $dir/lcoverage
+
