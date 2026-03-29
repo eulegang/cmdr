@@ -11,16 +11,19 @@ TEST(cmdr, bool_flag) {
   {
     cmdr::options opts = cmdr.parse({"cmd", "-v"});
     EXPECT_TRUE(opts.exists(verbose));
+    EXPECT_TRUE(opts.get<bool>(verbose));
   }
 
   {
     cmdr::options opts = cmdr.parse({"cmd", "--verbose"});
     EXPECT_TRUE(opts.exists(verbose));
+    EXPECT_TRUE(opts.get<bool>(verbose));
   }
 
   {
     cmdr::options opts = cmdr.parse({"cmd"});
     EXPECT_FALSE(opts.exists(verbose));
+    EXPECT_FALSE(opts.get<bool>(verbose));
   }
 }
 

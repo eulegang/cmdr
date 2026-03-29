@@ -34,6 +34,6 @@ template <> bool options::get<bool>(option_id id) {
   if (slot.bool_value.kind == options::slot_kind::unset)
     return false;
 
-  assert(slot.bool_value.kind != options::slot_kind::boolean);
+  assert(slot.bool_value.kind == options::slot_kind::boolean);
   return slot.bool_value.value;
 }
