@@ -2,7 +2,7 @@
 
 #include "cmdr.h"
 
-TEST(cmdr, verbose) {
+TEST(cmdr, bool_flag) {
   cmdr::cmdr cmdr{};
 
   cmdr::option_id verbose =
