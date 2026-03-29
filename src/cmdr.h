@@ -1,6 +1,7 @@
 #ifndef _CMDR_H
 #define _CMDR_H
 
+#include <cassert>
 #include <cstdint>
 #include <initializer_list>
 #include <vector>
@@ -68,7 +69,16 @@ class options final {
 
 public:
   bool exists(option_id id);
+
+  template <typename T> T get(option_id id) {
+    auto &slot = _slots[id];
+    assert(slot.check.kind == options::slot_kind::parsed);
+    return (T)slot.parsed_value.value;
+  }
 };
+
+template <> bool options::get<bool>(option_id id);
+template <> const char *options::get<const char *>(option_id id);
 
 class cmdr final {
   struct option_params {

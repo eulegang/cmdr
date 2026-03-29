@@ -19,6 +19,7 @@ class processor {
   void process_short(const char *);
   void process_long(const char *);
   void process_bare(const char *);
+  void process_flag(const char *);
 
 public:
   processor(const cmdr &cmdr, options &opts)

@@ -26,6 +26,7 @@ void processor::visit(const char *arg) {
     break;
 
   case state::flag:
+    process_flag(arg);
     break;
   }
 }
@@ -104,3 +105,18 @@ void processor::process_long(const char *arg) {
 }
 
 void processor::process_bare(const char *arg) { (void)arg; }
+
+void processor::process_flag(const char *arg) {
+  auto &params = _cmdr._options[_flag];
+  auto &slot = _opts._slots[_flag];
+
+  assert(slot.check.kind == options::slot_kind::unset &&
+         "should throw on multi set");
+
+  assert(!params.is_boolean());
+
+  slot = {.str_value = {
+              .kind = options::slot_kind::str,
+              .value = arg,
+          }};
+}
