@@ -10,6 +10,7 @@ add_library(
   src/cmdr.cpp
   src/processor.cpp
   src/option_builder.cpp
+  src/options.cpp
 )
 
 find_package(GTest REQUIRED)
