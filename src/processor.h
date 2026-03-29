@@ -13,6 +13,7 @@ class processor {
 
   const cmdr &_cmdr;
   options &_opts;
+  size_t _position;
   state _state;
   option_id _flag;
 
@@ -23,7 +24,7 @@ class processor {
 
 public:
   processor(const cmdr &cmdr, options &opts)
-      : _cmdr{cmdr}, _opts{opts}, _state{processor::state::cmd} {}
+      : _cmdr{cmdr}, _opts{opts}, _position{}, _state{processor::state::cmd} {}
   void visit(const char *arg);
   void finalize();
 };

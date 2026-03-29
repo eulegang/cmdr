@@ -35,4 +35,10 @@ option_builder &option_builder::boolean() {
   return *this;
 }
 
+option_builder &option_builder::position(size_t position) {
+  _cmdr._options[_id].position = position;
+
+  return *this;
+}
+
 option_id cmdr::option_builder::finalize() { return _id; }

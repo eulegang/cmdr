@@ -24,6 +24,7 @@ public:
   option_builder &full(const char *l);
   option_builder &required();
   option_builder &boolean();
+  option_builder &position(size_t pos);
   option_id finalize();
 };
 
@@ -87,6 +88,7 @@ class cmdr final {
 
     const char *long_opt = NULL;
     const char *name = NULL;
+    size_t position = -1;
     char short_opt = 0;
     char flags = 0;
 
@@ -100,6 +102,7 @@ class cmdr final {
   friend class options;
   friend class processor;
 
+  const option_params *lookup_pos(size_t, option_id *n = NULL) const;
   const option_params *lookup_short(char, option_id *n = NULL) const;
   const option_params *lookup_long(const char *, option_id *n = NULL) const;
 

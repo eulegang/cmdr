@@ -20,12 +20,28 @@ options cmdr::cmdr::parse(std::initializer_list<char const *> args) const {
   return opts;
 }
 
+const cmdr::cmdr::option_params *cmdr::cmdr::lookup_pos(size_t pos,
+                                                        option_id *id) const {
+  option_id cur = 0;
+  for (const auto &opt : _options) {
+    if (opt.position == pos) {
+      if (id)
+        *id = cur;
+      return &opt;
+    }
+    cur++;
+  }
+
+  return NULL;
+}
+
 const cmdr::cmdr::option_params *cmdr::cmdr::lookup_short(char ch,
                                                           option_id *id) const {
   option_id cur = 0;
   for (const auto &opt : _options) {
     if (opt.short_opt == ch) {
-      *id = cur;
+      if (id)
+        *id = cur;
       return &opt;
     }
     cur++;
@@ -39,7 +55,8 @@ const cmdr::cmdr::option_params *cmdr::cmdr::lookup_long(const char *arg,
   option_id cur = 0;
   for (const auto &opt : _options) {
     if (!strcmp(opt.long_opt, arg)) {
-      *id = cur;
+      if (id)
+        *id = cur;
       return &opt;
     }
     cur++;

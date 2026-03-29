@@ -104,7 +104,20 @@ void processor::process_long(const char *arg) {
   }
 }
 
-void processor::process_bare(const char *arg) { (void)arg; }
+void processor::process_bare(const char *arg) {
+  option_id id;
+  auto opt = _cmdr.lookup_pos(_position++, &id);
+  assert(opt && "should throw exception on missing flag");
+  assert(!opt->is_boolean());
+
+  auto &slot = _opts._slots[id];
+  assert(slot.str_value.kind == options::slot_kind::unset);
+
+  slot = {.str_value = {
+              .kind = options::slot_kind::str,
+              .value = arg,
+          }};
+}
 
 void processor::process_flag(const char *arg) {
   auto &params = _cmdr._options[_flag];

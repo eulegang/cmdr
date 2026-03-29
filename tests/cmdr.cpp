@@ -51,3 +51,21 @@ TEST(cmdr, str_flag) {
     EXPECT_EQ(opts.get<const char *>(output), nullptr);
   }
 }
+
+TEST(cmdr, position_flag) {
+  cmdr::cmdr cmdr{};
+
+  cmdr::option_id cmd = cmdr.option("cmd").position(0).finalize();
+
+  {
+    cmdr::options opts = cmdr.parse({"cmd", "ls"});
+    EXPECT_TRUE(opts.exists(cmd));
+    EXPECT_STREQ(opts.get<const char *>(cmd), "ls");
+  }
+
+  {
+    cmdr::options opts = cmdr.parse({"cmd"});
+    EXPECT_FALSE(opts.exists(cmd));
+    EXPECT_EQ(opts.get<const char *>(cmd), nullptr);
+  }
+}
