@@ -12,8 +12,14 @@ TEST(cmdr, verbose) {
     cmdr::options opts = cmdr.parse({"cmd", "-v"});
     EXPECT_TRUE(opts.exists(verbose));
   }
+
   {
     cmdr::options opts = cmdr.parse({"cmd", "--verbose"});
     EXPECT_TRUE(opts.exists(verbose));
+  }
+
+  {
+    cmdr::options opts = cmdr.parse({"cmd"});
+    EXPECT_FALSE(opts.exists(verbose));
   }
 }
