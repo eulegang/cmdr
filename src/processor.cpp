@@ -33,8 +33,7 @@ void processor::visit(const char *arg) {
 void processor::finalize() {}
 
 bool cmdr::is_short(const char *opt) {
-  if (!opt)
-    return false;
+  assert(opt);
 
   char a = *opt, b = *(opt + 1);
 
@@ -42,9 +41,7 @@ bool cmdr::is_short(const char *opt) {
 }
 
 bool cmdr::is_long(const char *opt) {
-  if (!opt)
-    return false;
-
+  assert(opt);
   char a = *opt, b = *(opt + 1);
 
   return a == '-' && b == '-';
