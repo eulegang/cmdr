@@ -87,3 +87,56 @@ TEST(cmdr, parse_position) {
     EXPECT_EQ(out->fd, 1);
   }
 }
+
+class Paths {
+public:
+  std::vector<std::string_view> _parts;
+
+  Paths() : _parts{} {}
+
+  static Paths *parse(const char *path) {
+    Paths *p = new Paths;
+
+    const char *base = path;
+    while (*path) {
+      if (*path == ':') {
+        p->_parts.emplace_back(base, path - base);
+        base = path + 1;
+      }
+
+      path++;
+    }
+    if (base != path)
+      p->_parts.emplace_back(base, path - base);
+
+    return p;
+  }
+};
+
+TEST(cmdr, env_parse_flag) {
+  cmdr::cmdr cmdr{};
+
+  cmdr::option_id input =
+      cmdr.option("path")
+          .abbrev('p')
+          .full("path")
+          .parse((std::function<Paths *(const char *)>)Paths::parse)
+          .env("PATH")
+          .finalize();
+
+  {
+    cmdr::options opts = cmdr.parse({"cmd"});
+    EXPECT_TRUE(opts.exists(input));
+
+    Paths *out = opts.get<Paths *>(input);
+    EXPECT_TRUE(out->_parts.size() != 0);
+  }
+
+  {
+    cmdr::options opts = cmdr.parse({"cmd", "-p", "/usr/bin:/usr/local/bin"});
+    EXPECT_TRUE(opts.exists(input));
+
+    Paths *out = opts.get<Paths *>(input);
+    EXPECT_TRUE(out->_parts.size() == 2);
+  }
+}

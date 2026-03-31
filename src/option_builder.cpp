@@ -41,4 +41,10 @@ option_builder &option_builder::position(size_t position) {
   return *this;
 }
 
+option_builder &option_builder::env(const char *var) {
+  _cmdr._options[_id].env = var;
+
+  return *this;
+}
+
 option_id cmdr::option_builder::finalize() { return _id; }

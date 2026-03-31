@@ -34,8 +34,38 @@ void processor::visit(const char *arg) {
 
 void processor::finalize() {
   for (size_t i{}; i < _opts._slots.size(); ++i) {
-    const auto &slot = _opts._slots[i];
+    auto &slot = _opts._slots[i];
     const auto &params = _cmdr._options[i];
+
+    if (params.env && slot.check.kind == options::slot_kind::unset) {
+      const char *val = getenv(params.env);
+
+      if (params.parse) {
+        if (val) {
+          void *obj = params.parse(val);
+          slot = {.parsed_value = {
+                      .kind = options::slot_kind::parsed,
+                      .value = obj,
+                  }};
+        }
+
+      } else if (params.is_boolean()) {
+        bool truthy = val && *val;
+
+        slot = {.bool_value = {
+                    .kind = options::slot_kind::boolean,
+                    .value = truthy,
+                }};
+
+      } else {
+        if (val) {
+          slot = {.str_value = {
+                      .kind = options::slot_kind::str,
+                      .value = val,
+                  }};
+        }
+      }
+    }
 
     if (params.is_required() && slot.check.kind == options::slot_kind::unset) {
       throw missing_required_error(params.name);

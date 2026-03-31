@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include <gtest/gtest.h>
 
 #include "cmdr.h"
@@ -67,5 +68,43 @@ TEST(cmdr, position_flag) {
     cmdr::options opts = cmdr.parse({"cmd"});
     EXPECT_FALSE(opts.exists(cmd));
     EXPECT_EQ(opts.get<const char *>(cmd), nullptr);
+  }
+}
+
+TEST(cmdr, env_flag) {
+  cmdr::cmdr cmdr{};
+
+  cmdr::option_id user =
+      cmdr.option("user").abbrev('u').full("user").env("USER").finalize();
+
+  {
+    cmdr::options opts = cmdr.parse({"cmd"});
+    EXPECT_TRUE(opts.exists(user));
+    EXPECT_STREQ(opts.get<const char *>(user), getenv("USER"));
+  }
+}
+
+TEST(cmdr, env_bool_flag) {
+  cmdr::cmdr cmdr{};
+
+  cmdr::option_id user = cmdr.option("user")
+                             .abbrev('u')
+                             .full("user")
+                             .env("USER")
+                             .boolean()
+                             .finalize();
+
+  cmdr::option_id unset = cmdr.option("unset")
+                              .abbrev('U')
+                              .full("unset")
+                              .env("UNSET_VARIABLE")
+                              .boolean()
+                              .finalize();
+
+  {
+    cmdr::options opts = cmdr.parse({"cmd"});
+
+    EXPECT_TRUE(opts.get<bool>(user));
+    EXPECT_FALSE(opts.get<bool>(unset));
   }
 }

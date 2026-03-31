@@ -124,6 +124,7 @@ class cmdr final {
 
     const char *long_opt = NULL;
     const char *name = NULL;
+    const char *env = NULL;
     size_t position = -1;
     char short_opt = 0;
     char flags = 0;
@@ -168,6 +169,7 @@ public:
   option_builder &required();
   option_builder &boolean();
   option_builder &position(size_t pos);
+  option_builder &env(const char *var);
   template <typename T>
   option_builder &parse(
       std::function<T *(const char *)> parse,
