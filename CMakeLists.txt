@@ -16,7 +16,11 @@ add_library(
 find_package(GTest REQUIRED)
 
 enable_testing()
-add_executable(unit tests/cmdr.cpp)
+add_executable(
+  unit 
+  tests/cmdr.cpp
+  tests/parse_flag.cpp
+)
 
 target_include_directories(unit PUBLIC ./src)
 target_link_libraries(unit cmdr)

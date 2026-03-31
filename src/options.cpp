@@ -10,7 +10,18 @@ bool cmdr::options::exists(option_id id) {
   return _slots[id].check.kind != slot_kind::unset;
 }
 
-options::options(const cmdr &cmdr) : _slots{} {
+options::~options() {
+  for (size_t i{}; i < _slots.size(); ++i) {
+    const auto &slot = _slots[i];
+    const auto &params = _cmdr._options[i];
+
+    if (slot.parsed_value.kind == options::slot_kind::parsed) {
+      params.deleteFn(slot.parsed_value.value);
+    }
+  }
+}
+
+options::options(const cmdr &cmdr) : _cmdr{cmdr}, _slots{} {
   _slots.reserve(cmdr._options.size());
 
   for (size_t i{}; i < cmdr._options.size(); i++) {

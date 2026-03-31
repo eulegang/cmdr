@@ -113,10 +113,19 @@ void processor::process_bare(const char *arg) {
   auto &slot = _opts._slots[id];
   assert(slot.str_value.kind == options::slot_kind::unset);
 
-  slot = {.str_value = {
-              .kind = options::slot_kind::str,
-              .value = arg,
-          }};
+  if (opt->parse) {
+    void *output = opt->parse(arg);
+    slot = {.parsed_value = {
+                .kind = options::slot_kind::parsed,
+                .value = output,
+            }};
+  } else {
+
+    slot = {.str_value = {
+                .kind = options::slot_kind::str,
+                .value = arg,
+            }};
+  }
 }
 
 void processor::process_flag(const char *arg) {
@@ -128,8 +137,16 @@ void processor::process_flag(const char *arg) {
 
   assert(!params.is_boolean());
 
-  slot = {.str_value = {
-              .kind = options::slot_kind::str,
-              .value = arg,
-          }};
+  if (params.parse) {
+    void *output = params.parse(arg);
+    slot = {.parsed_value = {
+                .kind = options::slot_kind::parsed,
+                .value = output,
+            }};
+  } else {
+    slot = {.str_value = {
+                .kind = options::slot_kind::str,
+                .value = arg,
+            }};
+  }
 }

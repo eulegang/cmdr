@@ -3,6 +3,7 @@
 
 #include <cassert>
 #include <cstdint>
+#include <functional>
 #include <initializer_list>
 #include <vector>
 
@@ -10,23 +11,6 @@ namespace cmdr {
 using option_id = uint16_t;
 
 class cmdr;
-
-class option_builder final {
-  ::cmdr::cmdr &_cmdr;
-  option_id _id;
-
-  option_builder(::cmdr::cmdr &cmdr, option_id id) : _cmdr{cmdr}, _id{id} {}
-
-  friend class cmdr;
-
-public:
-  option_builder &abbrev(char s);
-  option_builder &full(const char *l);
-  option_builder &required();
-  option_builder &boolean();
-  option_builder &position(size_t pos);
-  option_id finalize();
-};
 
 class options final {
   enum class slot_kind {
@@ -61,6 +45,7 @@ class options final {
     } check;
   };
 
+  const cmdr &_cmdr;
   std::vector<slot> _slots;
 
   friend class cmdr;
@@ -69,10 +54,13 @@ class options final {
   options(const cmdr &cmdr);
 
 public:
+  ~options();
   bool exists(option_id id);
 
   template <typename T> T get(option_id id) {
     auto &slot = _slots[id];
+    if (slot.check.kind == options::slot_kind::unset)
+      return nullptr;
     assert(slot.check.kind == options::slot_kind::parsed);
     return (T)slot.parsed_value.value;
   }
@@ -91,6 +79,8 @@ class cmdr final {
     size_t position = -1;
     char short_opt = 0;
     char flags = 0;
+    std::function<void *(const char *)> parse = nullptr;
+    std::function<void(void *)> deleteFn = nullptr;
 
     bool is_boolean() const { return (flags & FLAGS_boolean) != 0; }
     bool is_required() const { return (flags & FLAGS_required) != 0; }
@@ -109,10 +99,37 @@ class cmdr final {
 public:
   cmdr() : _options{} {}
 
-  option_builder option(const char *);
+  class option_builder option(const char *);
 
   options parse(int argc, const char **argv) const;
   options parse(std::initializer_list<const char *>) const;
+};
+
+class option_builder final {
+  ::cmdr::cmdr &_cmdr;
+  option_id _id;
+
+  option_builder(::cmdr::cmdr &cmdr, option_id id) : _cmdr{cmdr}, _id{id} {}
+
+  friend class cmdr;
+
+public:
+  option_builder &abbrev(char s);
+  option_builder &full(const char *l);
+  option_builder &required();
+  option_builder &boolean();
+  option_builder &position(size_t pos);
+  template <typename T>
+  option_builder &parse(
+      std::function<T *(const char *)> parse,
+      std::function<void(void *)> deleteFn = [](void *t) { delete (T *)t; }) {
+
+    _cmdr._options[_id].parse = parse;
+    _cmdr._options[_id].deleteFn = deleteFn;
+
+    return *this;
+  }
+  option_id finalize();
 };
 
 } // namespace cmdr
