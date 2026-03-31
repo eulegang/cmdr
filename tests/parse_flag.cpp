@@ -34,8 +34,6 @@ public:
 TEST(cmdr, parse_flag) {
   cmdr::cmdr cmdr{};
 
-  std::function<Input *(const char *)> fn = Input::parse;
-
   cmdr::option_id input =
       cmdr.option("input")
           .abbrev('i')

@@ -47,6 +47,12 @@ public:
                                 expected, actual)) {}
 };
 
+class missing_required_error : public parse_error {
+public:
+  missing_required_error(const char *name)
+      : parse_error(std::format("value never provided for {}", name)) {}
+};
+
 class options final {
   enum class slot_kind {
     unset,

@@ -32,7 +32,16 @@ void processor::visit(const char *arg) {
   }
 }
 
-void processor::finalize() {}
+void processor::finalize() {
+  for (size_t i{}; i < _opts._slots.size(); ++i) {
+    const auto &slot = _opts._slots[i];
+    const auto &params = _cmdr._options[i];
+
+    if (params.is_required() && slot.check.kind == options::slot_kind::unset) {
+      throw missing_required_error(params.name);
+    }
+  }
+}
 
 bool cmdr::is_short(const char *opt) {
   assert(opt);

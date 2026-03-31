@@ -20,6 +20,7 @@ add_executable(
   unit 
   tests/cmdr.cpp
   tests/parse_flag.cpp
+  tests/required_flag.cpp
 )
 
 target_include_directories(unit PUBLIC ./src)
