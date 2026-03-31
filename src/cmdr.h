@@ -3,6 +3,7 @@
 
 #include <cassert>
 #include <cstdint>
+#include <format>
 #include <functional>
 #include <initializer_list>
 #include <vector>
@@ -12,6 +13,40 @@ using option_id = uint16_t;
 
 class cmdr;
 
+class parse_error : public std::exception {
+  std::string msg;
+
+public:
+  parse_error(std::string msg) : msg{msg} {}
+  const char *what() const noexcept override { return msg.c_str(); }
+};
+
+class invalid_flag_error : public parse_error {
+public:
+  invalid_flag_error(const char *name)
+      : parse_error(std::format("invalid flag: ", name)) {}
+};
+
+class multiset_error : public parse_error {
+public:
+  multiset_error(const char *name)
+      : parse_error(std::format("multiple flags: ", name)) {}
+};
+
+class multivalue_error : public parse_error {
+public:
+  multivalue_error()
+      : parse_error(
+            "multiple short flags for values specified in same cluster") {}
+};
+
+class invalid_type_error : public parse_error {
+public:
+  invalid_type_error(const char *expected, const char *actual)
+      : parse_error(std::format("invalid value expected {} but found {}",
+                                expected, actual)) {}
+};
+
 class options final {
   enum class slot_kind {
     unset,
@@ -19,6 +54,8 @@ class options final {
     str,
     parsed,
   };
+
+  const char *slot_kind_repr(slot_kind);
 
   union slot {
     struct unset_flag_value {
@@ -61,7 +98,12 @@ public:
     auto &slot = _slots[id];
     if (slot.check.kind == options::slot_kind::unset)
       return nullptr;
-    assert(slot.check.kind == options::slot_kind::parsed);
+
+    if (slot.check.kind != options::slot_kind::parsed) {
+      throw invalid_type_error(slot_kind_repr(options::slot_kind::parsed),
+                               slot_kind_repr(slot.check.kind));
+    }
+
     return (T)slot.parsed_value.value;
   }
 };

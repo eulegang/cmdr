@@ -1,4 +1,5 @@
 #include "processor.h"
+#include "cmdr.h"
 #include <cassert>
 
 using cmdr::processor;
@@ -55,20 +56,26 @@ void processor::process_short(const char *arg) {
   while (*arg) {
     option_id id;
     auto opt = _cmdr.lookup_short(*arg, &id);
-    assert(opt && "should throw exception on missing flag");
+
+    if (!opt) {
+      throw invalid_flag_error(arg);
+    }
 
     if (opt->is_boolean()) {
       auto &slot = _opts._slots[id];
 
-      assert(slot.check.kind == options::slot_kind::unset &&
-             "should throw exception on multi set");
+      if (slot.check.kind != options::slot_kind::unset) {
+        throw multiset_error(arg);
+      }
 
       slot = {.bool_value{
           .kind = options::slot_kind::boolean,
           .value = true,
       }};
     } else {
-      assert(!opt_required && "should throw on ambigous flag values");
+      if (opt_required) {
+        throw multivalue_error();
+      }
       opt_required = true;
       _state = state::flag;
       _flag = id;
@@ -79,26 +86,26 @@ void processor::process_short(const char *arg) {
 }
 
 void processor::process_long(const char *arg) {
-  bool opt_required = false;
   arg += 2;
 
   option_id id;
   auto opt = _cmdr.lookup_long(arg, &id);
-  assert(opt && "should throw exception on missing flag");
+  if (!opt) {
+    throw invalid_flag_error(arg);
+  }
 
   if (opt->is_boolean()) {
     auto &slot = _opts._slots[id];
 
-    assert(slot.check.kind == options::slot_kind::unset &&
-           "should throw exception on multi set");
+    if (slot.check.kind != options::slot_kind::unset) {
+      throw multiset_error(arg);
+    }
 
     slot = {.bool_value{
         .kind = options::slot_kind::boolean,
         .value = true,
     }};
   } else {
-    assert(!opt_required && "should throw on ambigous flag values");
-    opt_required = true;
     _state = state::flag;
     _flag = id;
   }
@@ -107,11 +114,16 @@ void processor::process_long(const char *arg) {
 void processor::process_bare(const char *arg) {
   option_id id;
   auto opt = _cmdr.lookup_pos(_position++, &id);
-  assert(opt && "should throw exception on missing flag");
+  if (!opt) {
+    throw invalid_flag_error(arg);
+  }
+
   assert(!opt->is_boolean());
 
   auto &slot = _opts._slots[id];
-  assert(slot.str_value.kind == options::slot_kind::unset);
+  if (slot.check.kind != options::slot_kind::unset) {
+    throw multiset_error(arg);
+  }
 
   if (opt->parse) {
     void *output = opt->parse(arg);
@@ -132,8 +144,9 @@ void processor::process_flag(const char *arg) {
   auto &params = _cmdr._options[_flag];
   auto &slot = _opts._slots[_flag];
 
-  assert(slot.check.kind == options::slot_kind::unset &&
-         "should throw on multi set");
+  if (slot.check.kind != options::slot_kind::unset) {
+    throw multiset_error(arg);
+  }
 
   assert(!params.is_boolean());
 

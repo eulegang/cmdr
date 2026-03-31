@@ -35,7 +35,10 @@ template <> const char *options::get<const char *>(option_id id) {
   if (slot.bool_value.kind == options::slot_kind::unset)
     return NULL;
 
-  assert(slot.str_value.kind == options::slot_kind::str);
+  if (slot.str_value.kind != options::slot_kind::str) {
+    throw invalid_type_error(slot_kind_repr(options::slot_kind::str),
+                             slot_kind_repr(slot.check.kind));
+  }
   return slot.str_value.value;
 }
 
@@ -45,6 +48,24 @@ template <> bool options::get<bool>(option_id id) {
   if (slot.bool_value.kind == options::slot_kind::unset)
     return false;
 
-  assert(slot.bool_value.kind == options::slot_kind::boolean);
+  if (slot.str_value.kind != options::slot_kind::boolean) {
+    throw invalid_type_error(slot_kind_repr(options::slot_kind::boolean),
+                             slot_kind_repr(slot.check.kind));
+  }
   return slot.bool_value.value;
+}
+
+const char *options::slot_kind_repr(options::slot_kind kind) {
+  switch (kind) {
+  case slot_kind::unset:
+    return "unset";
+  case slot_kind::boolean:
+    return "bool";
+  case slot_kind::str:
+    return "string";
+  case slot_kind::parsed:
+    return "parsed";
+  }
+
+  assert(false && "should not get here");
 }
