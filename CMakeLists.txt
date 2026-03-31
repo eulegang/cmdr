@@ -21,6 +21,7 @@ add_executable(
   tests/cmdr.cpp
   tests/parse_flag.cpp
   tests/error_flags.cpp
+  tests/test_argv.cpp
 )
 
 target_include_directories(unit PUBLIC ./src)

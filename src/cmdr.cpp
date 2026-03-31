@@ -8,13 +8,38 @@ using cmdr::option_id;
 using cmdr::options;
 using cmdr::processor;
 
-options cmdr::cmdr::parse(std::initializer_list<char const *> args) const {
+options cmdr::cmdr::parse(std::initializer_list<const char *> args) const {
   try {
     options opts{*this};
     processor proc{*this, opts};
 
     for (const auto &arg : args) {
       proc.visit(arg);
+    }
+
+    proc.finalize();
+
+    return opts;
+  } catch (const parse_error &err) {
+    if (rethrow) {
+      throw;
+    } else {
+      std::cerr << err.what() << std::endl;
+      exit(1);
+    }
+  }
+}
+
+options cmdr::cmdr::parse(int argc, const char **argv) const {
+  try {
+    options opts{*this};
+    processor proc{*this, opts};
+
+    while (argc) {
+      proc.visit(*argv);
+
+      argv++;
+      argc--;
     }
 
     proc.finalize();
