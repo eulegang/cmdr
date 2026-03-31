@@ -67,3 +67,23 @@ TEST(cmdr, parse_flag) {
     EXPECT_EQ(opts.get<Input *>(input), nullptr);
   }
 }
+
+TEST(cmdr, parse_position) {
+  cmdr::cmdr cmdr{};
+
+  cmdr::option_id input =
+      cmdr.option("input")
+          .position(0)
+          .parse((std::function<Input *(const char *)>)Input::parse)
+          .finalize();
+
+  {
+    cmdr::options opts = cmdr.parse({"cmd", "-"});
+    EXPECT_TRUE(opts.exists(input));
+
+    Input *out = opts.get<Input *>(input);
+
+    ASSERT_TRUE(out);
+    EXPECT_EQ(out->fd, 1);
+  }
+}

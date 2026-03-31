@@ -145,7 +145,8 @@ class cmdr final {
   const option_params *lookup_long(const char *, option_id *n = NULL) const;
 
 public:
-  cmdr() : _options{} {}
+  bool rethrow;
+  cmdr() : _options{}, rethrow{false} {}
 
   class option_builder option(const char *);
 

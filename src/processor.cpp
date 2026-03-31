@@ -48,7 +48,7 @@ bool cmdr::is_short(const char *opt) {
 
   char a = *opt, b = *(opt + 1);
 
-  return a == '-' && a != 0 && b != '-';
+  return a == '-' && a != 0 && b != '-' && b != 0;
 }
 
 bool cmdr::is_long(const char *opt) {
@@ -130,9 +130,8 @@ void processor::process_bare(const char *arg) {
   assert(!opt->is_boolean());
 
   auto &slot = _opts._slots[id];
-  if (slot.check.kind != options::slot_kind::unset) {
-    throw multiset_error(arg);
-  }
+  // should never be not unset since position sweeps
+  assert(slot.check.kind == options::slot_kind::unset);
 
   if (opt->parse) {
     void *output = opt->parse(arg);

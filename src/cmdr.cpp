@@ -2,22 +2,32 @@
 #include "processor.h"
 #include <cassert>
 #include <cstring>
+#include <iostream>
 
 using cmdr::option_id;
 using cmdr::options;
 using cmdr::processor;
 
 options cmdr::cmdr::parse(std::initializer_list<char const *> args) const {
-  options opts{*this};
-  processor proc{*this, opts};
+  try {
+    options opts{*this};
+    processor proc{*this, opts};
 
-  for (const auto &arg : args) {
-    proc.visit(arg);
+    for (const auto &arg : args) {
+      proc.visit(arg);
+    }
+
+    proc.finalize();
+
+    return opts;
+  } catch (const parse_error &err) {
+    if (rethrow) {
+      throw;
+    } else {
+      std::cerr << err.what() << std::endl;
+      exit(1);
+    }
   }
-
-  proc.finalize();
-
-  return opts;
 }
 
 const cmdr::cmdr::option_params *cmdr::cmdr::lookup_pos(size_t pos,
