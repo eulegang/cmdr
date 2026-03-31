@@ -125,6 +125,7 @@ class cmdr final {
     const char *long_opt = NULL;
     const char *name = NULL;
     const char *env = NULL;
+    const char *help = NULL;
     size_t position = -1;
     char short_opt = 0;
     char flags = 0;
@@ -136,6 +137,9 @@ class cmdr final {
   };
 
   std::vector<option_params> _options;
+  std::string _name = "";
+  std::string _version = "";
+  std::string _description = "";
 
   friend class option_builder;
   friend class options;
@@ -144,15 +148,21 @@ class cmdr final {
   const option_params *lookup_pos(size_t, option_id *n = NULL) const;
   const option_params *lookup_short(char, option_id *n = NULL) const;
   const option_params *lookup_long(const char *, option_id *n = NULL) const;
+  static size_t option_size(const option_params &);
 
 public:
   bool rethrow;
+  cmdr(std::string name, std::string version, std::string description)
+      : _options{}, _name{name}, _version{version}, _description{description},
+        rethrow{false} {}
   cmdr() : _options{}, rethrow{false} {}
 
   class option_builder option(const char *);
 
   options parse(int argc, const char **argv) const;
   options parse(std::initializer_list<const char *>) const;
+
+  std::string help() const;
 };
 
 class option_builder final {
@@ -170,6 +180,7 @@ public:
   option_builder &boolean();
   option_builder &position(size_t pos);
   option_builder &env(const char *var);
+  option_builder &help(const char *var);
   template <typename T>
   option_builder &parse(
       std::function<T *(const char *)> parse,

@@ -47,4 +47,10 @@ option_builder &option_builder::env(const char *var) {
   return *this;
 }
 
+option_builder &option_builder::help(const char *help) {
+  _cmdr._options[_id].help = help;
+
+  return *this;
+}
+
 option_id cmdr::option_builder::finalize() { return _id; }
