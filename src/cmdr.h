@@ -13,6 +13,12 @@ using option_id = uint16_t;
 
 class cmdr;
 
+class control {
+public:
+  bool is_help;
+  control(bool is_help) : is_help{is_help} {}
+};
+
 class parse_error : public std::exception {
   std::string msg;
 
@@ -121,6 +127,8 @@ class cmdr final {
   struct option_params {
     static const char FLAGS_required = 1 << 0;
     static const char FLAGS_boolean = 1 << 1;
+    static const char FLAGS_help = 1 << 2;
+    static const char FLAGS_version = 1 << 3;
 
     const char *long_opt = NULL;
     const char *name = NULL;
@@ -152,10 +160,8 @@ class cmdr final {
 
 public:
   bool rethrow;
-  cmdr(std::string name, std::string version, std::string description)
-      : _options{}, _name{name}, _version{version}, _description{description},
-        rethrow{false} {}
-  cmdr() : _options{}, rethrow{false} {}
+  cmdr();
+  cmdr(std::string name, std::string version, std::string description);
 
   class option_builder option(const char *);
 

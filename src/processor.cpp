@@ -101,6 +101,11 @@ void processor::process_short(const char *arg) {
     }
 
     if (opt->is_boolean()) {
+      if ((opt->flags & (cmdr::option_params::FLAGS_version |
+                         cmdr::option_params::FLAGS_help)) != 0) {
+        throw control((opt->flags & cmdr::option_params::FLAGS_help) != 0);
+      }
+
       auto &slot = _opts._slots[id];
 
       if (slot.check.kind != options::slot_kind::unset) {

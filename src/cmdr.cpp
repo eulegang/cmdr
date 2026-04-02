@@ -9,6 +9,38 @@ using cmdr::option_id;
 using cmdr::options;
 using cmdr::processor;
 
+cmdr::cmdr::cmdr() : _options{}, rethrow{false} {
+  option_id id = option("help")
+                     .abbrev('h')
+                     .full("help")
+                     .help("display this help message")
+                     .boolean()
+                     .finalize();
+
+  _options[id].flags |= cmdr::option_params::FLAGS_help;
+}
+
+cmdr::cmdr::cmdr(std::string name, std::string version, std::string description)
+    : _options{}, _name{name}, _version{version}, _description{description},
+      rethrow{false} {
+  option_id help_id = option("help")
+                          .abbrev('h')
+                          .full("help")
+                          .help("display this help message")
+                          .boolean()
+                          .finalize();
+
+  option_id version_id = option("version")
+                             .abbrev('V')
+                             .full("version")
+                             .help("display version information")
+                             .boolean()
+                             .finalize();
+
+  _options[help_id].flags |= cmdr::option_params::FLAGS_help;
+  _options[version_id].flags |= cmdr::option_params::FLAGS_version;
+}
+
 options cmdr::cmdr::parse(std::initializer_list<const char *> args) const {
   try {
     options opts{*this};
@@ -21,6 +53,14 @@ options cmdr::cmdr::parse(std::initializer_list<const char *> args) const {
     proc.finalize();
 
     return opts;
+  } catch (control c) {
+    if (c.is_help) {
+      std::cout << help() << std::endl;
+    } else {
+      std::cout << _version << std::endl;
+    }
+
+    exit(0);
   } catch (const parse_error &err) {
     if (rethrow) {
       throw;
@@ -46,6 +86,14 @@ options cmdr::cmdr::parse(int argc, const char **argv) const {
     proc.finalize();
 
     return opts;
+  } catch (control c) {
+    if (c.is_help) {
+      std::cout << help() << std::endl;
+    } else {
+      std::cout << _version << std::endl;
+    }
+
+    exit(0);
   } catch (const parse_error &err) {
     if (rethrow) {
       throw;
